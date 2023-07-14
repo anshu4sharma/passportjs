@@ -7,6 +7,8 @@ const app = express();
 const bodyParser = require("body-parser");
 const { UserRouter } = require("./routes/User.js");
 const PORT = process.env.PORT || 3000;
+const morgan = require('morgan')
+app.use(morgan('dev'))
 app.use(bodyParser.json());
 
 app.use(bodyParser.urlencoded({ extended: true }));

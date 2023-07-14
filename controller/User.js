@@ -34,6 +34,20 @@ class UserController {
       });
     })(req, res, next);
   }
+
+  static async Logout(req, res) {
+    req.logout();
+    res.status(200).json({ message: "logged out" });
+  }
+
+  static async GetAllUsers(req, res) {
+    try {
+      let users = await User.find({});
+      res.json(users);
+    } catch (error) {
+      res.json({ message: error });
+    }
+  }
 }
 
 exports.UserController = UserController;
