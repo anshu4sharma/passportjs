@@ -1,11 +1,16 @@
 const passport = require("passport");
 const { User } = require("../models/User");
+const NodeCache = require("node-cache");
+const myCache = new NodeCache();
 
 class UserController {
   static async Register(req, res) {
     const { username, password } = req.body;
     console.log(req.body);
     try {
+      if (!username || !password) {
+        return res.status(400).send("Username and password required");
+      }
       const isUserExist = await User.findOne({ username });
       if (isUserExist) {
         return res.status(400).send("That user already exists!");
@@ -14,7 +19,7 @@ class UserController {
       res.status(201).json(user);
     } catch (err) {
       console.log(err);
-      res.status(500).send("Error registering new user please try again.");
+      res.status(500).send(err.message);
     }
   }
 
@@ -42,8 +47,21 @@ class UserController {
 
   static async GetAllUsers(req, res) {
     try {
-      let users = await User.find({});
-      res.json(users);
+      let anshuValue = myCache.get("anshu");
+      if (anshuValue !== undefined) {
+        return res.json({
+          message: anshuValue,
+        });
+      }
+      const anshu = new Promise((resolve, reject) => {
+        setTimeout(async() => {
+          let users = await User.find({});
+          resolve(users);
+        }, 3000);
+      });
+      const result = await anshu;
+      myCache.set("anshu", result, 100);
+      res.json(result);
     } catch (error) {
       res.json({ message: error });
     }
